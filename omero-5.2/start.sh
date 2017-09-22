@@ -4,6 +4,7 @@ echo
 echo 'OMERO user environment variables'
 echo '******************************************'
 source /etc/omero/omero-setup.sh
+echo "source /etc/omero/omero-setup.sh" >> /opt/omero/.bashrc
 su omero -c 'printenv'
 echo '******************************************'
 echo
@@ -36,7 +37,6 @@ echo
 echo 'configure omero server'
 echo '******************************************'
 cd /opt/omero
-su omero -c 'ls -lah'
 su omero -c 'ln -s OMERO.server-* OMERO.server'
 su omero -c 'OMERO.server/bin/omero config set omero.data.dir "$OMERO_DATA_DIR"'
 su omero -c 'OMERO.server/bin/omero config set omero.db.name "$OMERO_DB_NAME"'
@@ -59,7 +59,11 @@ rm /etc/nginx/sites-enabled/default
 ln -s /etc/nginx/sites-available/omero-web /etc/nginx/sites-enabled/
 service nginx start
 
+# ubuntu 16.04 requires enabling the postgresql.service so postgres automatically starts when rebooted
+systemctl enable postgresql.service
+
 su omero -c 'OMERO.server/bin/omero web start'
 su omero -c 'OMERO.server/bin/omero admin start --foreground'
+
 
 exec "$@";

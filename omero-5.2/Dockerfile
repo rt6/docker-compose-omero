@@ -52,6 +52,10 @@ RUN apt-get update && apt-get -y install postgresql-9.4
 RUN service postgresql start
 RUN systemctl enable postgresql.service
 
+################
+# OMERO server
+################
+
 RUN mkdir -p /etc/omero
 COPY omero.conf /etc/omero
 COPY omero-setup.sh /etc/omero
@@ -61,6 +65,7 @@ RUN useradd -b /opt -m -c "OMERO service user" -r -s /bin/bash -U omero
 RUN chmod a+X ~omero
 COPY OMERO.server-5.2.8-ice36-b57.zip /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
 #RUN wget http://downloads.openmicroscopy.org/latest/omero5.2/server-ice36.zip -O OMERO.server-ice36.zip
+
 
 RUN chown omero:omero /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
 RUN chown omero:omero /etc/omero/omero.conf
@@ -78,6 +83,35 @@ USER root
 #RUN apt-get update && apt-get -y install nginx
 RUN apt-get -y install nginx
 
+################
+# OMERO server
+################
+
+# omero startup script
+COPY omero-init.d /etc/init.d/omero
+RUN chmod a+x /etc/init.d/omero && \
+    update-rc.d -f omero remove && \
+    update-rc.d -f omero defaults 98 02
+
+# omero web server startup script
+COPY omero-web-init.d /etc/init.d/omero-web
+RUN chmod a+x /etc/init.d/omero-web && \
+    update-rc.d -f omero-web remove && \
+    update-rc.d -f omero-web defaults 98 02
+
+# Ubuntu 16.04 requires wrapping system v startup scripts in system d units
+# omero.service requires postgresql service to be enabled
+COPY omero.service /lib/systemd/system/omero.service
+RUN systemctl enable postgresql.service && \
+    systemctl enable omero.service
+
+# omero-web service requires nginx and omero service to be enabled
+COPY omero-web.service  /lib/systemd/system/omero-web.service
+RUN systemctl enable omero-web.service
+
+# setup daily cron job to clean up sessions
+COPY omero-web-clear-sessions /etc/cron.daily/omero-web-clear-sessions
+RUN chmod a+x /etc/cron.daily/omero-web-clear-sessions
 
 COPY start.sh /start.sh
 CMD ["bash","/start.sh"]

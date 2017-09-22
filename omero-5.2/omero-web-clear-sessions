@@ -1,0 +1,3 @@
+#!/bin/bash
+. /etc/omero/omero-setup.sh
+su - ${OMERO_ADMIN} -c "${OMERO_SERVER}/bin/omero web clearsessions"

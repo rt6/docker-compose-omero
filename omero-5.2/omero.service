@@ -1,0 +1,13 @@
+[Unit]
+Description=OMERO Server
+Wants=remote-fs.target postgresql.service
+After=remote-fs.target postgresql.service
+   
+[Service]
+Type=forking
+ExecStart=/etc/init.d/omero start
+ExecStop=/etc/init.d/omero stop
+
+
+[Install]
+WantedBy=multi-user.target

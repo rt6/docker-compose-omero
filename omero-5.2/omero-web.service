@@ -1,0 +1,12 @@
+[Unit]
+Description=OMERO web
+Wants=nginx.service omero.service
+After=nginx.service omero.service
+   
+[Service]
+Type=forking
+ExecStart=/etc/init.d/omero-web start
+ExecStop=/etc/init.d/omero-web stop
+
+[Install]
+WantedBy=multi-user.target
