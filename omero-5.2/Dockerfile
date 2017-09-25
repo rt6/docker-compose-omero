@@ -83,6 +83,11 @@ USER root
 #RUN apt-get update && apt-get -y install nginx
 RUN apt-get -y install nginx
 
+# copy ssl keys for nginx
+COPY nginx-ssl/omero.key /etc/omero/omero.domain-name.com.key
+COPY nginx-ssl/omero.crt /etc/omero/omero.domain-name.com.crt
+COPY nginx-ssl/nginx_omero_ssl.conf /etc/nginx/sites-available/omero-web
+
 ################
 # OMERO server
 ################

@@ -54,7 +54,7 @@ echo
 echo 'configure omero web server'
 echo '******************************************'
 su omero -c 'OMERO.server/bin/omero web config nginx --http "$OMERO_WEB_PORT"> OMERO.server/nginx.conf.tmp'
-cp ~omero/OMERO.server/nginx.conf.tmp /etc/nginx/sites-available/omero-web
+#cp ~omero/OMERO.server/nginx.conf.tmp /etc/nginx/sites-available/omero-web
 rm /etc/nginx/sites-enabled/default
 ln -s /etc/nginx/sites-available/omero-web /etc/nginx/sites-enabled/
 service nginx start
