@@ -21,7 +21,14 @@ su omero -c 'rm /opt/omero/OMERO.server*.zip'
 #RUN rm OMERO.server-ice36.zip
 
 service postgresql start
-sleep 2
+#sleep 5
+
+# Wait for postgre server to be up
+#while ! pg_isready -h $HOST -p $PORT -d omero -U omero --quiet; do
+while ! pg_isready -h localhost -p 5432; do
+    echo "Waiting for database server to be up."
+    sleep 5s;
+done
 
 echo
 echo 'create OMERO database user'
