@@ -1,5 +1,11 @@
 FROM ubuntu:16.04
 
+#Open ports to other containers in Docker network
+EXPOSE 443
+EXPOSE 4063
+EXPOSE 4064
+EXPOSE 80
+
 # Install Java and other packages
 RUN apt-get update && \ 
   apt-get upgrade -y && \
@@ -63,11 +69,12 @@ COPY omero-setup.sh /etc/omero
 ## Create service user: omero
 RUN useradd -b /opt -m -c "OMERO service user" -r -s /bin/bash -U omero
 RUN chmod a+X ~omero
-COPY OMERO.server-5.2.8-ice36-b57.zip /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
 #RUN wget http://downloads.openmicroscopy.org/latest/omero5.2/server-ice36.zip -O OMERO.server-ice36.zip
+#COPY OMERO.server-5.2.8-ice36-b57.zip /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
+#RUN chown omero:omero /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
+COPY omero-5.3.4-ice36.zip /opt/omero/OMERO.server-5.3.4-ice36-b57.zip
+RUN chown omero:omero /opt/omero/OMERO.server-5.3.4-ice36-b57.zip
 
-
-RUN chown omero:omero /opt/omero/OMERO.server-5.2.8-ice36-b57.zip
 RUN chown omero:omero /etc/omero/omero.conf
 RUN chown omero:omero /etc/omero/omero-setup.sh
 RUN chown omero:omero /etc/omero/omero*
@@ -81,7 +88,8 @@ RUN chmod 700 /etc/omero/omero*
 USER root
 #RUN add-apt-repository ppa:nginx/stable
 #RUN apt-get update && apt-get -y install nginx
-RUN apt-get -y install nginx
+RUN apt-get -y install nginx \
+  supervisor
 
 # copy ssl keys for nginx
 COPY nginx-ssl/omero.key /etc/omero/omero.domain-name.com.key
@@ -118,5 +126,13 @@ RUN systemctl enable omero-web.service
 COPY omero-web-clear-sessions /etc/cron.daily/omero-web-clear-sessions
 RUN chmod a+x /etc/cron.daily/omero-web-clear-sessions
 
+COPY supervisord/omero-supervisor.conf /etc/supervisor/conf.d/omero-supervisor.conf
+COPY supervisord/start_web.sh /start_web.sh
+RUN chown omero:omero /start_web.sh
+COPY supervisord/start_omero.sh /start_omero.sh
+RUN chown omero:omero /start_omero.sh
+RUN systemctl enable supervisor
+
 COPY start.sh /start.sh
 CMD ["bash","/start.sh"]
+
