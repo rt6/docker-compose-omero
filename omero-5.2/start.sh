@@ -69,11 +69,13 @@ ln -s /etc/nginx/sites-available/omero-web /etc/nginx/sites-enabled/
 
 # ubuntu 16.04 requires enabling the postgresql.service so postgres automatically starts when rebooted
 systemctl enable postgresql.service
-service supervisor start
-supervisorctl start all
+#service supervisor start
+#supervisorctl start all
 
 # start omero server before omero web
-su omero -c 'OMERO.server/bin/omero admin start --foreground'
+#su omero -c 'OMERO.server/bin/omero admin start --foreground'
 #su - omero -c 'OMERO.server/bin/omero web start'
+
+/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 
  #exec "$@";

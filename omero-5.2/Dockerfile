@@ -88,8 +88,7 @@ RUN chmod 700 /etc/omero/omero*
 USER root
 #RUN add-apt-repository ppa:nginx/stable
 #RUN apt-get update && apt-get -y install nginx
-RUN apt-get -y install nginx \
-  supervisor
+RUN apt-get -y install nginx
 
 # copy ssl keys for nginx
 COPY nginx-ssl/omero.key /etc/omero/omero.domain-name.com.key
@@ -126,6 +125,9 @@ RUN systemctl enable omero-web.service
 COPY omero-web-clear-sessions /etc/cron.daily/omero-web-clear-sessions
 RUN chmod a+x /etc/cron.daily/omero-web-clear-sessions
 
+COPY start.sh /start.sh
+
+RUN apt-get -y install supervisor
 COPY supervisord/omero-supervisor.conf /etc/supervisor/conf.d/omero-supervisor.conf
 COPY supervisord/start_web.sh /start_web.sh
 RUN chown omero:omero /start_web.sh
@@ -133,6 +135,6 @@ COPY supervisord/start_omero.sh /start_omero.sh
 RUN chown omero:omero /start_omero.sh
 RUN systemctl enable supervisor
 
-COPY start.sh /start.sh
 CMD ["bash","/start.sh"]
 
+#CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
